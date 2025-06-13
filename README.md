@@ -3,49 +3,45 @@
 最小構成
 ```mermaid
 erDiagram
-  users ||--o{ messages : "ユーザー"
-  rooms ||--o{ messages : "所属ルーム"
-  users ||--o{ rooms : "作成者"
-  rooms ||--o{ room_members : "メンバー"
-  users ||--o{ room_members : "参加者"
-  users ||--o{ room_members : "招待者"
+  users ||--o{ messages : ""
+  users ||--o{ room_members : ""
+  rooms ||--o{ room_members : ""
+  rooms ||--o{ messages : ""
 
   users {
     UUID id PK "ユーザーID"
-    TEXT username "ユーザー名（ログインID）"
+    TEXT username "ユーザー名"
     TEXT email "メールアドレス"
     TEXT password_hash "パスワード（ハッシュ化）"
     TIMESTAMP deactivated_at "退会日時"
-    TIMESTAMP created_at "アカウント作成日時"
-    TIMESTAMP updated_at "最終更新日時"
+    TIMESTAMP created_at "作成日時"
+    TIMESTAMP updated_at "更新日時"
   }
 
   messages {
     UUID id PK "メッセージID"
-    UUID user_id FK "送信者のユーザーID"
-    UUID room_id FK "所属するルームID"
-    TEXT content "メッセージ内容"
-    TIMESTAMP created_at "メッセージ送信日時"
-    TIMESTAMP updated_at "メッセージ更新日時"
+    UUID user_id FK "送信者ID"
+    UUID room_id FK "所属ルームID"
+    TEXT content "送信内容"
+    TIMESTAMP created_at "送信日時"
+    TIMESTAMP updated_at "更新日時"
   }
 
   rooms {
     UUID id PK "ルームID"
     TEXT name "ルーム名"
-    UUID created_by FK "ルーム作成者のユーザーID"
-    TEXT visibility "ルームの可視性"
-    TIMESTAMP created_at "ルーム作成日時"
-    TIMESTAMP updated_at "ルーム更新日時"
+    UUID created_by FK "ルーム作成者ID"
+    TIMESTAMP created_at "作成日時"
+    TIMESTAMP updated_at "更新日時"
   }
 
   room_members {
     UUID room_id FK "ルームID"
     UUID user_id FK "ユーザーID"
-    TEXT role "役割"
+    TEXT role "参加者種別"
     UUID invited_by FK "招待者"
-    BOOLEAN is_active "ルーム参加状態"
+    BOOLEAN is_active "参加状態"
     TIMESTAMP joined_at "参加日時"
-    PK (room_id, user_id)
   }
 
 ```
@@ -56,41 +52,41 @@ erDiagram
 ```sql
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
-  username TEXT NOT NULL UNIQUE,  -- ユーザー名（ログインID）
+  username TEXT NOT NULL UNIQUE,  -- ユーザー名
   email TEXT UNIQUE,  -- メールアドレス
   password_hash TEXT,  -- パスワード（ハッシュ化）
   deactivated_at TIMESTAMP,  -- 退会日時
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- アカウント作成日時
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 作成日時
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- 最終更新日時
 );
 ```
 
-## 3. messages（メッセージ）テーブル
+## messages（メッセージ）テーブル
 メッセージ送信と受信を管理するテーブル。
 ```sql
 CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id),  -- 送信者のユーザーID
-  room_id INTEGER REFERENCES rooms(id),  -- 所属するルームID
-  content TEXT,  -- メッセージ内容
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- メッセージ送信日時
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- メッセージ更新日時
+  user_id INTEGER REFERENCES users(id),  -- 送信者者ID
+  room_id INTEGER REFERENCES rooms(id),  -- ルームID
+  content TEXT,  -- 送信内容
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 送信日時
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- 更新日時
 );
 ```
-## 4. rooms（ルーム）テーブル
+## rooms（ルーム）テーブル
 チャットルームに関する基本的な情報を管理するテーブル。
 ```sql
 CREATE TABLE rooms (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,  -- ルーム名
-  created_by INTEGER REFERENCES users(id),  -- ルーム作成者のユーザーID
-  visibility TEXT DEFAULT 'public',  -- ルームの可視性（公開、非公開、招待制など）
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- ルーム作成日時
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- ルーム更新日時
+  created_by INTEGER REFERENCES users(id),  -- ルーム作成者者ID
+  visibility TEXT DEFAULT 'public',  -- ルーム公開設定
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 作成日時
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- 更新日時
 );
 ```
 
-## 5. room_members（ルームメンバー）テーブル
+## room_members（ルームメンバー）テーブル
 ユーザーとルームの多対多のリレーションを管理するテーブル。
 ```sql
 CREATE TABLE room_members (
@@ -106,10 +102,9 @@ CREATE TABLE room_members (
 
 
 ---
-将来的に追加
+将来的に追加想定
 
-
-## 2. authentications（認証）テーブル
+## authentications（認証）テーブル
 ユーザーの認証情報を管理するテーブル。
 ```sql
 CREATE TABLE authentications (
@@ -123,9 +118,7 @@ CREATE TABLE authentications (
 );
 ```
 
-
-
-## 6. likes（いいね）テーブル
+## message_likes（いいね）テーブル
 ユーザーがメッセージに対して「いいね！」をする機能に対応するテーブル。
 ```sql
 CREATE TABLE likes (
@@ -137,7 +130,7 @@ CREATE TABLE likes (
 );
 ```
 
-## 7. message_read（既読）テーブル
+## message_read（既読）テーブル
 メッセージの既読状態を管理するテーブル。
 ```sql
 CREATE TABLE read_receipts (
@@ -148,7 +141,7 @@ CREATE TABLE read_receipts (
 );
 ```
 
-## 8. mentions（メンション）テーブル
+## message_mentions（メンション）テーブル
 メッセージ内でユーザーがメンションされた情報を管理するテーブル。
 ```sql
 CREATE TABLE mentions (
@@ -158,8 +151,7 @@ CREATE TABLE mentions (
 );
 ```
 
-
-## 9. notifications（通知）テーブル
+## notifications（通知）テーブル
 通知機能に対応するテーブル。
 ```sql
 CREATE TABLE notifications (
@@ -173,7 +165,7 @@ CREATE TABLE notifications (
 );
 ```
 
-## 10. follows（フォロー）テーブル
+## follows（フォロー）テーブル
 ユーザー同士がフォローする機能に対応するテーブル。
 ```sql
 CREATE TABLE follows (
@@ -184,7 +176,7 @@ CREATE TABLE follows (
 );
 ```
 
-## 11. profiles（プロフィール）テーブル
+## profiles（プロフィール）テーブル
 ユーザーのプロフィール情報を管理するテーブル。
 ```sql
 CREATE TABLE profiles (
@@ -195,4 +187,28 @@ CREATE TABLE profiles (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 作成日時
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- 更新日時
 );
+```
+
+## room_visibility（ルーム公開設定）テーブル
+```sql
+CREATE TABLE room_visibility (
+  visibility_id SERIAL PRIMARY KEY,
+  room_id UUID REFERENCES rooms(id),  -- ルームID
+  visibility TEXT DEFAULT 'public' NOT NULL,  -- 公開設定
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 作成日時
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- 更新日時
+);
+```
+
+## message_images（メッセージ画像）テーブル 
+```
+CREATE TABLE images (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),  -- ユーザーID
+  message_id INTEGER REFERENCES messages(id),  -- メッセージID
+  image_url TEXT,  -- 画像のURL
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 画像のアップロード日時
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- 画像の更新日時
+);
+
 ```
