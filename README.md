@@ -1,6 +1,57 @@
 # DB設計
 
-## 1.users（ユーザー）テーブル 
+最小構成
+```mermaid
+erDiagram
+  users ||--o{ messages : "ユーザー"
+  rooms ||--o{ messages : "所属ルーム"
+  users ||--o{ rooms : "作成者"
+  rooms ||--o{ room_members : "メンバー"
+  users ||--o{ room_members : "参加者"
+  users ||--o{ room_members : "招待者"
+
+  users {
+    UUID id PK "ユーザーID"
+    TEXT username "ユーザー名（ログインID）"
+    TEXT email "メールアドレス"
+    TEXT password_hash "パスワード（ハッシュ化）"
+    TIMESTAMP deactivated_at "退会日時"
+    TIMESTAMP created_at "アカウント作成日時"
+    TIMESTAMP updated_at "最終更新日時"
+  }
+
+  messages {
+    UUID id PK "メッセージID"
+    UUID user_id FK "送信者のユーザーID"
+    UUID room_id FK "所属するルームID"
+    TEXT content "メッセージ内容"
+    TIMESTAMP created_at "メッセージ送信日時"
+    TIMESTAMP updated_at "メッセージ更新日時"
+  }
+
+  rooms {
+    UUID id PK "ルームID"
+    TEXT name "ルーム名"
+    UUID created_by FK "ルーム作成者のユーザーID"
+    TEXT visibility "ルームの可視性"
+    TIMESTAMP created_at "ルーム作成日時"
+    TIMESTAMP updated_at "ルーム更新日時"
+  }
+
+  room_members {
+    UUID room_id FK "ルームID"
+    UUID user_id FK "ユーザーID"
+    TEXT role "役割"
+    UUID invited_by FK "招待者"
+    BOOLEAN is_active "ルーム参加状態"
+    TIMESTAMP joined_at "参加日時"
+    PK (room_id, user_id)
+  }
+
+```
+
+
+## users（ユーザー）テーブル 
 ユーザー情報を管理するテーブル。
 ```sql
 CREATE TABLE users (
@@ -8,24 +59,9 @@ CREATE TABLE users (
   username TEXT NOT NULL UNIQUE,  -- ユーザー名（ログインID）
   email TEXT UNIQUE,  -- メールアドレス
   password_hash TEXT,  -- パスワード（ハッシュ化）
-  is_active BOOLEAN DEFAULT TRUE,  -- 退会管理用
   deactivated_at TIMESTAMP,  -- 退会日時
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- アカウント作成日時
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- 最終更新日時
-);
-```
-
-## 2. authentications（認証）テーブル
-ユーザーの認証情報を管理するテーブル。
-```sql
-CREATE TABLE authentications (
-  id SERIAL PRIMARY KEY, 
-  user_id INTEGER REFERENCES users(id),  -- ユーザーID
-  provider TEXT NOT NULL,  -- 認証方式の識別
-  provider_user_id TEXT NOT NULL,  -- 外部認証サービスのユーザーID
-  token TEXT,  -- 認証用トークン
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 認証情報の作成日時
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- 認証情報の更新日時
 );
 ```
 
@@ -37,13 +73,10 @@ CREATE TABLE messages (
   user_id INTEGER REFERENCES users(id),  -- 送信者のユーザーID
   room_id INTEGER REFERENCES rooms(id),  -- 所属するルームID
   content TEXT,  -- メッセージ内容
-  media_url TEXT,  -- 画像やメディアのURL
-  status TEXT DEFAULT 'unread',  -- メッセージの状態（既読,未読）
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- メッセージ送信日時
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- メッセージ更新日時
 );
 ```
-
 ## 4. rooms（ルーム）テーブル
 チャットルームに関する基本的な情報を管理するテーブル。
 ```sql
@@ -71,6 +104,27 @@ CREATE TABLE room_members (
 );
 ```
 
+
+---
+将来的に追加
+
+
+## 2. authentications（認証）テーブル
+ユーザーの認証情報を管理するテーブル。
+```sql
+CREATE TABLE authentications (
+  id SERIAL PRIMARY KEY, 
+  user_id INTEGER REFERENCES users(id),  -- ユーザーID
+  provider TEXT NOT NULL,  -- 認証方式の識別
+  provider_user_id TEXT NOT NULL,  -- 外部認証サービスのユーザーID
+  token TEXT,  -- 認証用トークン
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 認証情報の作成日時
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- 認証情報の更新日時
+);
+```
+
+
+
 ## 6. likes（いいね）テーブル
 ユーザーがメッセージに対して「いいね！」をする機能に対応するテーブル。
 ```sql
@@ -83,7 +137,7 @@ CREATE TABLE likes (
 );
 ```
 
-## 7. read_receipts（既読）テーブル
+## 7. message_read（既読）テーブル
 メッセージの既読状態を管理するテーブル。
 ```sql
 CREATE TABLE read_receipts (
