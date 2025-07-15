@@ -2,9 +2,15 @@ FROM node:22-slim
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# PrismaCLIのためにOpenSSLをインストール
+# Procpsはクラッシュ対策
+RUN apt-get update && apt-get install -y openssl procps && rm -rf /var/lib/apt/lists/*
 
-COPY pnpm-lock.yaml package.json ./
+# Dockerイメージ内でpnpmを使用するためにCorepackを有効化
+RUN corepack enable && corepack prepare pnpm@10.13.1 --activate
+
+COPY package.json ./
+
 RUN pnpm install
 
 COPY . .
