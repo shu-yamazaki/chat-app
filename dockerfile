@@ -2,6 +2,14 @@ FROM node:22-slim
 
 WORKDIR /app
 
+ENV LANG=ja_JP.UTF-8
+ENV TZ=Asia/Tokyo
+
+RUN apt-get update && \
+    apt-get install -y locales curl procps && \
+    locale-gen ja_JP.UTF-8 && \
+    localedef -f UTF-8 -i ja_JP ja_JP
+
 # PrismaCLIのためにOpenSSLをインストール
 # Procpsはクラッシュ対策
 RUN apt-get update && apt-get install -y openssl procps && rm -rf /var/lib/apt/lists/*
