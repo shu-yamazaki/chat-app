@@ -1,0 +1,79 @@
+// Prismaクライアントを生成する設定（npx prisma generateで使われる）
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"] //Macで動かす用
+}
+
+// データベース接続設定
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// NestJSでGraphQLの型を自動生成する設定
+generator nestgraphql {
+  provider = "prisma-nestjs-graphql"
+  output   = "../src/@generated"
+}
+
+// ユーザー権限の型
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+model User {
+  id             String    @id @default(uuid()) @db.Uuid // DB側でuuid型で保存する指示
+  username       String?
+  email          String    @unique
+  passwordHash   String    @map("password_hash") // DB側でスネークケースを使う
+  deactivatedAt  DateTime? @map("deactivated_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  messages       Message[]
+  roomMembers    RoomMember[]
+  createdRooms   Room[]    @relation("RoomCreatedBy", map: "created_rooms")
+  invitedMembers RoomMember[] @relation("InvitedBy", map: "invited_members")
+}
+
+model Message {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  roomId    String   @map("room_id") @db.Uuid
+  content   String   @db.VarChar(1000)
+  isEdited  Boolean  @default(false) @map("is_edited")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id])
+  room      Room     @relation(fields: [roomId], references: [id])
+}
+
+model Room {
+  id         String     @id @default(uuid()) @db.Uuid
+  name       String
+  createdBy  String     @map("created_by") @db.Uuid
+  isPrivate  Boolean    @default(false) @map("is_private")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+
+  creator    User       @relation("RoomCreatedBy", fields: [createdBy], references: [id])
+  messages   Message[]
+  roomMembers RoomMember[]
+}
+
+model RoomMember {
+  roomId     String   @map("room_id") @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  role       Role     @default(MEMBER)
+  invitedBy  String?  @map("invited_by") @db.Uuid
+  isActive   Boolean  @default(true) @map("is_active")
+  joinedAt   DateTime @default(now()) @map("joined_at")
+
+  room       Room     @relation(fields: [roomId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+  inviter    User?    @relation("InvitedBy", fields: [invitedBy], references: [id])
+
+  @@id([roomId, userId])
+}
