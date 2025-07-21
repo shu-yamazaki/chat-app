@@ -24,3 +24,5 @@ export class MessageModel {
   @Field(() => UserModel)
   user: UserModel;
 }
+
+// 投稿用のinput型も別ファイルをあとで定義するべき

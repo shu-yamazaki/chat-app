@@ -1,0 +1,7 @@
+# Mac側の node_modules を含めるとPrismaが動作不安定になるため除外
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+.env
+dist
