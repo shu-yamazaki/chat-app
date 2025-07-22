@@ -26,7 +26,18 @@ type Query {
 }
 
 type Mutation {
-  createMessage(content: String!, roomId: String!, userId: String!): MessageModel!
+  createMessage(input: CreateMessageInput!): MessageModel!
+}
+
+input CreateMessageInput {
+  """ルームID"""
+  roomId: ID!
+
+  """送信者ID"""
+  senderId: ID!
+
+  """メッセージ内容（最大1000文字）"""
+  content: String!
 }
 
 type Subscription {

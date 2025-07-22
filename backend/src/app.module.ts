@@ -3,9 +3,8 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { PrismaService } from './prisma/prisma.service';
-import { MessageService } from './message/message.service';
-import { MessageResolver } from './message/message.resolver';
 import { PubSubModule } from './pubsub/pubsub.module';
+import { MessageModule } from './message/message.module';
 
 @Module({
   imports: [
@@ -20,7 +19,8 @@ import { PubSubModule } from './pubsub/pubsub.module';
       },
     }),
     PubSubModule,
+    MessageModule,
   ],
-  providers: [PrismaService, MessageService, MessageResolver],
+  providers: [PrismaService],
 })
 export class AppModule {}
