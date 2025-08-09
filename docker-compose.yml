@@ -3,14 +3,17 @@ version: '3.8'
 services:
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: dockerfile
-    working_dir: /backend
+      target: backend
+    working_dir: /workspace/chat-app/backend
     ports:
       - '3000:3000'
       - '5555:5555' # Prisma Studioのポート
     volumes:
-      - ./backend:/backend
+      - .:/workspace/chat-app/:cached
+      - backend_node_modules:/workspace/chat-app/backend/node_modules
+    command: sh -lc "pnpm install && pnpm prisma generate && pnpm start:dev"
     depends_on:
       - db
     environment:
@@ -18,13 +21,16 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: .
       dockerfile: dockerfile
-    working_dir: /frontend
+      target: frontend
+    working_dir: /workspace/chat-app/frontend
     ports:
       - '3001:3000'
     volumes:
-      - ./frontend:/frontend
+      - .:/workspace/chat-app/:cached
+      - frontend_node_modules:/workspace/chat-app/frontend/node_modules
+    command: sh -lc "pnpm install && pnpm dev"
     depends_on:
       - backend
 
@@ -42,4 +48,6 @@ services:
 
 volumes:
   pgdata:
-  # コンテナを再起動してもデータ消えなくなるらしいので入れました
+  backend_node_modules:
+  frontend_node_modules:
+    # node_modulesをボリュームにすることで、ホストとコンテナ間での依存関係の不整合を防ぐ
