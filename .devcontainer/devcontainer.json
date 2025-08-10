@@ -7,34 +7,16 @@
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "22"
-    },
     "ghcr.io/devcontainers/features/common-utils:2": {}
   },
 
 "postCreateCommand": "sh -lc 'cd backend && pnpm install && pnpm prisma generate'",
 
 "extensions": [
-    "christian-kohler.path-intellisense",
-    "dbaeumer.vscode-eslint",
-    "donjayamanne.githistory",
-    "esbenp.prettier-vscode",
-    "formulahendry.auto-close-tag",
-    "formulahendry.auto-rename-tag",
-    "github.copilot",
-    "github.copilot-chat",
-    "GraphQL.vscode-graphql",
-    "mosapride.zenkaku",
-    "ms-azuretools.vscode-docker",
-    "ms-ceintl.vscode-language-pack-ja",
-    "ms-vscode-remote.remote-containers",
-    "naumovs.color-highlight",
-    "oderwat.indent-rainbow",
-    "Prisma.prisma",
-    "shardulm94.trailing-spaces",
-    "streetsidesoftware.code-spell-checker",
-    "stylelint.vscode-stylelint",
-    "vmsynkov.colonize"
-  ]
+        "dbaeumer.vscode-eslint",
+        "stylelint.vscode-stylelint",
+        "Prisma.prisma",
+        "GraphQL.vscode-graphql",
+        "esbenp.prettier-vscode"
+      ]
 }
