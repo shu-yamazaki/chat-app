@@ -1,17 +1,25 @@
 // repositoryの抽象クラス
 // 型定義だけして、実際の操作は具象クラスで定義する
 
-import { Prisma } from '@prisma/client';
+export type User = {
+  id: string;
+};
 
-export type MessageWithUser = Prisma.MessageGetPayload<{
-  include: { user: true };
-}>;
+export type Message = {
+  id: string;
+  content: string;
+  roomId: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: User;
+};
 
 export abstract class MessageRepository {
-  abstract findMessagesByRoomId(roomId: string): Promise<MessageWithUser[]>;
+  abstract findMessagesByRoomId(roomId: string): Promise<Message[]>;
   abstract createMessage(
     content: string,
     roomId: string,
     userId: string,
-  ): Promise<MessageWithUser>;
+  ): Promise<Message>;
 }
