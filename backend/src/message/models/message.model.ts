@@ -1,5 +1,6 @@
-// コードファーストでGraphQLの型を定義するためのモデル
-// Prismaのスキーマを橋渡しして、GraphQLの型を自動生成してあげてるらしい
+// クライアントに返すレスポンスの型定義
+// DBとサーバー間はPrismaの型定義を使うが、
+// クライアントとサーバー間はGraphQLの型定義を使う
 
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { UserModel } from '@/user/models/user.model';
