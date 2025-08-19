@@ -13,7 +13,7 @@ import { MessageModule } from './message/message.module';
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
       subscriptions: {
-        'subscriptions-transport-ws': {
+        'graphql-ws': {
           path: '/graphql',
         },
       },
