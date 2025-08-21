@@ -2,10 +2,7 @@
 // ここで定義した順番で処理が実行される+ロジックもここに書くのがクリーンアーキテクチャの考え方らしい
 
 import { Injectable, Inject } from '@nestjs/common';
-import {
-  MessageRepository,
-  MessageWithUser,
-} from '../repositories/message.repository';
+import { MessageRepository, Message } from '../repositories/message.repository';
 import { PubSub } from 'graphql-subscriptions';
 
 // UseCaseとしてメッセージ作成のロジックを定義
@@ -21,7 +18,7 @@ export class CreateMessageUseCase {
     content: string,
     roomId: string,
     userId: string,
-  ): Promise<MessageWithUser> {
+  ): Promise<Message> {
     const newMessage = await this.messageRepository.createMessage(
       content,
       roomId,

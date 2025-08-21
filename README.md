@@ -17,8 +17,7 @@ docker compose exec app ts-node prisma/seed.ts
 ```
 ## Prismaのイメージ
 ファイルが多くて役割の違いがいまいちわからないけど下記のようなイメージ
-
-役割
+Mermaid```
 User[お客さん]
 Client[注文所]
 GraphQL[注文メモ]

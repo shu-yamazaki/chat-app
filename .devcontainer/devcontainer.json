@@ -1,0 +1,22 @@
+{
+  "name": "chat-app-dev",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "backend",
+  "workspaceFolder": "/workspace/chat-app",
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+  },
+
+"postCreateCommand": "sh -lc 'cd backend && pnpm install && pnpm prisma generate'",
+
+"extensions": [
+        "dbaeumer.vscode-eslint",
+        "stylelint.vscode-stylelint",
+        "Prisma.prisma",
+        "GraphQL.vscode-graphql",
+        "esbenp.prettier-vscode"
+      ]
+}

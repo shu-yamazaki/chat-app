@@ -3,13 +3,13 @@
 
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { MessageRepository, MessageWithUser } from './message.repository';
+import { MessageRepository, Message } from './message.repository';
 
 @Injectable()
 export class MessagePrismaRepository implements MessageRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findMessagesByRoomId(roomId: string): Promise<MessageWithUser[]> {
+  async findMessagesByRoomId(roomId: string): Promise<Message[]> {
     return this.prisma.message.findMany({
       where: { roomId },
       orderBy: { createdAt: 'asc' },
@@ -21,7 +21,7 @@ export class MessagePrismaRepository implements MessageRepository {
     content: string,
     roomId: string,
     userId: string,
-  ): Promise<MessageWithUser> {
+  ): Promise<Message> {
     return this.prisma.message.create({
       data: { content, roomId, userId },
       include: { user: true },
